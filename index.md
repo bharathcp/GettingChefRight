@@ -6,6 +6,7 @@ Recently we developed a chef community Library cookbook for installing and confi
 Before we think of developing any cookbook in chef the first step is to check for an existing cookbook on [Supermarket](https://supermarket.chef.io/), we just did that and interestingly found no results for 'bitbucket' , then we tried 'stash' (former name for bitbucket) and found only one cookbook [stash](https://supermarket.chef.io/cookbooks/stash) , but it had no support for 5.x version. The next thought was we should contribute to the stash cookbook. But after spending a bit of time with the stash, we observed:
  - It was trying to solve too many things in one cookbook. For instance it included options to install the DB. I would ideally use it as a different cookbook.
  - Its chef dependancy was old. 
+
 Hence we chose to write a simple cookbook that only installs and manages bitbucket without too many other dependancies. We have to give due credits to the [stash](https://supermarket.chef.io/cookbooks/stash) cookbook developers, from who many aspects of this cookbook was inspired from.
 
 ## Deciding between custom resource and recipe
@@ -27,6 +28,7 @@ So we decided to look at some of the featured and most followed cookbooks on sup
 Yes, thats right! Not there are 2 choices to write your own chef resource:
  - develop a cookbook including `LWRP`,`HWRP`,Libraries
  - `custom_resources`
+
 Until `chef-12.4` the chef way of developing cookbooks was using a combination of `LWRP`,`HWRP` and Libraries. But in relese `chef-12.5` chef introcuded `custom_resources` as a better and simpler way of developing chef resources. Folks at Chef have done a great job providing some sample cookbooks as reference in the [Chef Communicty Cookbook Repo](https://github.com/chef-cookbooks). We found [tomcat](https://github.com/chef-cookbooks/tomcat) implementation very neat and easy to understand. We strongly recommend any one starting out with cookbook development to start with this as a reference. Also checkout this awesome presentation by [TimothySmith](https://www.slideshare.net/TimothySmith56/chefconf-2016-writing-compossible-community-cookbooks-using-chef-custom-resources) on developing chef custom resources. These two resources were invaluable for us to undestand and start thinking and implementing our first community cookbook.
 
 Our preferred approach was [**custom_resources**](https://docs.chef.io/custom_resources.html). This is the new way to implement [**LWRP**](https://docs.chef.io/custom_resources_notes.html). This lets author of the wrapper cookbook to use these resources in his recipe like any other chef resource passing whatever is needed. For instance:
