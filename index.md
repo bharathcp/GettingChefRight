@@ -44,6 +44,8 @@ Using chef generate command to generate the Project structure was easy. The inte
 Chef's ecosystem is itself evolving and so are the toolsets for developing, testing and deploying.
 Since Chef itself is mostly built using Ruby, lot of Ruby development practices also come in handy while developing Chef Cookbook. Few worth mentioning are **Bundler**, **Rake**, **Rubocop** and **RSpec**. If one knows these tools developing Quality Chef Cookbooks will be much faster and better. 
 
+![Chef CD Pipeline](chef_cd.png)
+
 ### How do I TDD a cookbook?
 We mostly followed Test Driven approach and started out with unit tests, then implementation, followed by System tests (Using [**InSpec**](https://www.inspec.io/) with [**kitchen**](http://kitchen.ci/)). We were able to do changes and iterate quickly using this approach.  
 While [**kitchen**](http://kitchen.ci/) is an amazing tool, we found [**chefspec**](https://github.com/chefspec/chefspec) to be better for TDD. It has fast feedback while development. We are very impressed with [**chefspec**](https://github.com/chefspec/chefspec) as a tool to unit test cookbooks. It is very helpful to test your intentions in a `recipe`/`custom_resource` without having to create and destroy containers evertime you test. 
@@ -77,6 +79,10 @@ It goes without saying that [**foodcritic**](http://www.foodcritic.io/) and [**R
 Using plain [**Rubocop**](https://github.com/bbatsov/rubocop) was a bit more interesting. The first `chef exec rubocop -a` came up with over 100 errors(many of them auto-corrected). We quickly realised is using plain rubocop was annoying with silly warnings and errors on files like `metadata.rb`. Using `rubocop -a` option will change file permissions declaration like `00755` to `0o0755` in recipes. These are very common problems in every cookbook and I should not be configuring `.rubocop.yml` in every one of them. We found it useful to use [**cookstyle**](https://github.com/chef/cookstyle) gem which is opinionated [**Rubocop**](https://github.com/bbatsov/rubocop) for chef cookbook development. None of the nonsense of plain [**Rubocop**](https://github.com/bbatsov/rubocop). Just what you may need for cookbook development.
 
 ### System testing and TravisCI
+This stage is a 2 step Process:
+* Step 1 - test/cookbooks/test : Test recipie to deploy the Bitbucket Server using our Library Cookbook in different scenarios
+* Step 2 - test/smoke/default  : The InSpec tests Post deployment
+
 Using [**kitchen**](http://kitchen.ci/) with [**docker**](https://github.com/test-kitchen/kitchen-docker) was more enticing for us until we needed some things that are not designed to run in docker. For instance, getting `systemd` service installed in docker is not straight forward. Though vagrant/virtualbox is slightly slower than docker, it can be used with kitchen to test these scenarios.
 I am a fan of CI and I love PullRequest builders. The most common CI tool available for opensource repos is [**TravisCI**](https://travis-ci.org/). But if we are to use [**kitchen**](http://kitchen.ci/) tests in [**TravisCI**](https://travis-ci.org/), we have to refrain from vagrant/virtualbox. This is because travis build environments would not support it. We had to restrict ourselves to docker. [**kitchen-dokken**](https://github.com/someara/kitchen-dokken) driver helped us come around this constraint. 
 
