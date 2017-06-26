@@ -80,17 +80,19 @@ Using plain [**Rubocop**](https://github.com/bbatsov/rubocop) was a bit more int
 
 ### System testing and TravisCI
 This stage is a 2 step Process:
-* Step 1 - test/cookbooks/test : Test recipie to deploy the Bitbucket Server using our Library Cookbook in different scenarios
-* Step 2 - test/smoke/default  : The InSpec tests Post deployment
+* Step 1 - test/cookbooks/test : Since the cookbook is just a bunch of resources, we need a test recipe that executes these resources.  
+* Step 2 - test/smoke/default  : The InSpec tests Post deployment. 
 
 Using [**kitchen**](http://kitchen.ci/) with [**docker**](https://github.com/test-kitchen/kitchen-docker) was more enticing for us until we needed some things that are not designed to run in docker. For instance, getting `systemd` service installed in docker is not straight forward. Though vagrant/virtualbox is slightly slower than docker, it can be used with kitchen to test these scenarios.
 I am a fan of CI and I love PullRequest builders. The most common CI tool available for opensource repos is [**TravisCI**](https://travis-ci.org/). But if we are to use [**kitchen**](http://kitchen.ci/) tests in [**TravisCI**](https://travis-ci.org/), we have to refrain from vagrant/virtualbox. This is because travis build environments would not support it. We had to restrict ourselves to docker. [**kitchen-dokken**](https://github.com/someara/kitchen-dokken) driver helped us come around this constraint. 
+
+### Checking dependancy updates
+I generally prefer keeping dependancies (both cookbook and gem) as upto date as possible. This help in making sure upgrades are in small increments. The problem is following the updates of all the resources and tracking them against what is used. We found [**VersionEye**](https://www.versioneye.com) to be a good tool to track this on github PRs. It flags any outdated dependancies including `Gemfile`, `Berksfile` and `metadata.rb`. This prompts any commiter to review the version.
+
+![Pull request checks](github_versioneye_screenshot.png)
 
 ### Managing releases/Deployment
 Just a quick google search reveals some organised way of maintaining change logs and releasing to supermarket. We found [**github_changelog_generator**](https://github.com/skywinder/github-changelog-generator) and [**stove**](https://github.com/sethvargo/stove) to be useful Gems to use.
 [**stove**](https://github.com/sethvargo/stove) makes sure you dont do silly mistakes like trying to release from a branch other than master. It also makes sure there are no local changes before releasing. It also tags the repo with the release version.
 [**github_changelog_generator**](https://github.com/skywinder/github-changelog-generator) lets you generate automated changelog from git history.
  
-### Managing dependancies
-I generally prefer keeping dependancies (both cookbook and gem) as upto date as possible. This help in making sure upgrades are in small increments. The problem is following the updates of all the resources and tracking them against what is used. We found [**VersionEye**](https://www.versioneye.com) to be a good tool to track this on github PRs. It flags any outdated dependancies including `Gemfile`, `Berksfile` and `metadata.rb`. This prompts any commiter to review the version.
-
