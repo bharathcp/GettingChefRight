@@ -4,12 +4,12 @@ Recently we developed a Chef community cookbook for installing and configuring A
 
 ## Why we chose to develop a new cookbook?
 
-Before we think of developing any cookbook in Chef the first step is to check for an existing cookbook on the Chef [Supermarket](https://supermarket.Chef.io/). We did that and interestingly found no results for 'Bitbucket', then we tried 'Stash' (former name for Bitbucket) and found only one cookbook [stash](https://supermarket.Chef.io/cookbooks/stash) which had no support for the 5.x version. We considered contributing to the Stash cookbook, but we observed:
+Before we think of developing any cookbook in Chef the first step is to check for an existing cookbook on the Chef [Supermarket](https://supermarket.chef.io/). We did that and interestingly found no results for 'Bitbucket', then we tried 'Stash' (former name for Bitbucket) and found only one cookbook [stash](https://supermarket.chef.io/cookbooks/stash) which had no support for the 5.x version. We considered contributing to the Stash cookbook, but we observed:
 
 - It was trying to solve too many things in one cookbook. For instance it included options to install the database, which I would prefer as a different cookbook.
 - Its Chef dependency was old.
 
-Hence we chose to write a simple cookbook that only installs and manages Bitbucket without too many other dependancies. We have to give due credits to the [stash](https://supermarket.Chef.io/cookbooks/stash) cookbook developers, from who many aspects of this cookbook was inspired.
+Hence we chose to write a simple cookbook that only installs and manages Bitbucket without too many other dependencies. We have to give due credits to the [stash](https://supermarket.chef.io/cookbooks/stash) cookbook developers, from who many aspects of this cookbook was inspired.
 
 ## Deciding between custom resource and recipe
 
@@ -29,7 +29,7 @@ Instead of:
 include_recipe "git::default"
 ```
 
-So we decided to look at some of the featured and most followed cookbooks on supermarket. Many of them defined their own resources like [docker](https://supermarket.Chef.io/cookbooks/docker) or [mysql](https://supermarket.Chef.io/cookbooks/mysql). It was clear we wanted to provide our own Bitbucket resources rather than recipes.
+So we decided to look at some of the featured and most followed cookbooks on supermarket. Many of them defined their own resources like [docker](https://supermarket.chef.io/cookbooks/docker) or [mysql](https://supermarket.chef.io/cookbooks/mysql). It was clear we wanted to provide our own Bitbucket resources rather than recipes.
 
 ## LWRP, HWRP & Libraries or Custom Resources?
 
@@ -40,10 +40,10 @@ Yes, thats right! Now there are 2 choices to write your own Chef resource:
 
 Until `Chef-12.4` the Chef way of developing cookbooks was using a combination of `LWRP`,`HWRP` and Libraries. But in relese `Chef-12.5` Chef introcuded `custom_resources` as a better and simpler way of developing Chef resources. The folks at Chef have done a great job providing some sample cookbooks as reference in the [Chef Community Cookbook Repo](https://github.com/Chef-cookbooks). We found the [tomcat](https://github.com/Chef-cookbooks/tomcat) implementation very neat and easy to understand. We strongly recommend anyone starting out with cookbook development to start with this as a reference. Also checkout this [awesome presentation on developing Chef custom resources](https://www.slideshare.net/TimothySmith56/Chefconf-2016-writing-compossible-community-cookbooks-using-Chef-custom-resources) by Timothy Smith. These two resources were invaluable for us to undestand and start thinking and implementing our first community cookbook.
 
-Our preferred approach was [**custom_resources**](https://docs.Chef.io/custom_resources.html). This is the new way to implement [**LWRP**](https://docs.Chef.io/custom_resources_notes.html). Custom Resources let the author of the wrapper cookbook use these resources in a recipe like any other Chef resource, passing whatever is needed. For instance:
+Our preferred approach was [**custom_resources**](https://docs.chef.io/custom_resources.html). This is the new way to implement [**LWRP**](https://docs.chef.io/custom_resources_notes.html). Custom Resources let the author of the wrapper cookbook use these resources in a recipe like any other Chef resource, passing whatever is needed. For instance:
 
 ```Ruby
-Bitbucket_install 'Bitbucket' do
+bitbucket_install 'bitbucket' do
   jre_home "#{node['java']['java_home']}/jre"
   jvm_args "some_data_bag_item"
 end
@@ -55,19 +55,19 @@ Using the Chef generate command to generate the Project structure was easy. The 
 Chef's ecosystem is itself evolving and so are the toolsets for developing, testing and deploying.
 Since Chef itself is mostly built using Ruby, lots of Ruby development practices also come in handy while developing a Chef Cookbook. A few worth mentioning are **bundler**, **rake**, **rubocop** and **rspec**. If one knows these tools developing Quality Chef Cookbooks will be much faster and better.
 
-![Chef CD Pipeline](Chef_cd.png)
+![Chef CD Pipeline](chef_cd.png)
 
 ### How do I test drive a cookbook?
 
 We mostly followed a Test Driven Development (TDD) approach and started out with unit tests, then implementation, followed by system tests (Using [**InSpec**](https://www.inspec.io/) with [**kitchen**](http://kitchen.ci/)). We were able to do changes and iterate quickly using this approach.
-While [**kitchen**](http://kitchen.ci/) is an amazing tool, we found [**Chefspec**](https://github.com/Chefspec/Chefspec) to be better for TDD. It has fast feedback while developing. We are very impressed with [**Chefspec**](https://github.com/Chefspec/Chefspec) as a tool to unit test cookbooks. It is very helpful to test your intentions in a `recipe`/`custom_resource` without having to create and destroy containers everytime you test.
+While [**kitchen**](http://kitchen.ci/) is an amazing tool, we found [**Chefspec**](https://github.com/chefspec/chefspec) to be better for TDD. It has fast feedback while developing. We are very impressed with [**Chefspec**](https://github.com/chefspec/chefspec) as a tool to unit test cookbooks. It is very helpful to test your intentions in a `recipe`/`custom_resource` without having to create and destroy containers everytime you test.
 Since we have decided to use `custom_resource`, we needed to unit test what the `custom_resource` executes internally. It was useful to utilise `step_into` option to unit test the intentions of the `custom_resource` itself.
 
 When a wrapper cookbook uses this `custom_resource`, it should not be testing what the `custom_resource` does internally. It should only test the `custom_resource` from outside. Much like:
 
 ```Ruby
 it 'installs Bitbucket server' do
-  expect(Chef_run).to install_Bitbucket('Bitbucket')
+  expect(Chef_run).to install_bitbucket('bitbucket')
     .with_jre_home('/usr/lib/jvm/java-8-oracle/jre')
 end
 ```
@@ -75,8 +75,8 @@ end
 We can enable such tests using `matchers` like:
 
 ```Ruby
-def install_Bitbucket(resource_name)
-  ChefSpec::Matchers::ResourceMatcher.new(:Bitbucket_install, :install, resource_name)
+def install_bitbucket(resource_name)
+  ChefSpec::Matchers::ResourceMatcher.new(:bitbucket_install, :install, resource_name)
 end
 ```
 
@@ -84,7 +84,7 @@ It is also important that the `matchers` of the `custom_resource` are exposed as
 
 ### Test Coverage
 
-This is something that gets tricky in cookbooks. While `SimpleCov` is a good tool for plain ruby, it is not as useful for using with [**Chefspec**](https://github.com/Chefspec/Chefspec). I tend to agree with Seth Vargo that `SimpleCov` [may not be the best way to track coverage](https://sethvargo.com/Chef-recipe-code-coverage/) for a recipe. Although the [**Chefspec**](https://github.com/Chefspec/Chefspec)'s way of describing coverage (using `at_exit { ChefSpec::Coverage.report! }`) does not produce fancy reports, it is more useful in terms of counting resources touched by test cases vs lines executed.
+This is something that gets tricky in cookbooks. While `SimpleCov` is a good tool for plain ruby, it is not as useful for using with [**Chefspec**](https://github.com/chefspec/chefspec). I tend to agree with Seth Vargo that `SimpleCov` [may not be the best way to track coverage](https://sethvargo.com/chef-recipe-code-coverage/) for a recipe. Although the [**Chefspec**](https://github.com/chefspec/chefspec)'s way of describing coverage (using `at_exit { ChefSpec::Coverage.report! }`) does not produce fancy reports, it is more useful in terms of counting resources touched by test cases vs lines executed.
 Note: the blog post is quite old and some of the things described about generating `./.coverage/results.json` are outdated.
 
 ### Style/Linting
@@ -95,7 +95,7 @@ It goes without saying that [**foodcritic**](http://www.foodcritic.io/) and [**R
 - getting the right format of the supported OS version.
 - generally making sure the details in `metadata.rb` are usable and meaningful when published to supermarket.
 
-Using plain [**Rubocop**](https://github.com/bbatsov/rubocop) was a bit more interesting. The first `Chef exec rubocop -a` came up with over 100 errors(many of them auto-corrected). We quickly realised that using plain rubocop was annoying with silly warnings and errors on files like `metadata.rb`. Using `rubocop -a` option will change file permissions declaration like `00755` to `0o0755` in recipes. These are very common problems in every cookbook and I should not be configuring `.rubocop.yml` in every one of them. We found it useful to use [**cookstyle**](https://github.com/Chef/cookstyle) gem which is opinionated [**Rubocop**](https://github.com/bbatsov/rubocop) for Chef cookbook development. None of the nonsense of plain [**Rubocop**](https://github.com/bbatsov/rubocop). Just what you may need for cookbook development.
+Using plain [**Rubocop**](https://github.com/bbatsov/rubocop) was a bit more interesting. The first `Chef exec rubocop -a` came up with over 100 errors(many of them auto-corrected). We quickly realised that using plain rubocop was annoying with silly warnings and errors on files like `metadata.rb`. Using `rubocop -a` option will change file permissions declaration like `00755` to `0o0755` in recipes. These are very common problems in every cookbook and I should not be configuring `.rubocop.yml` in every one of them. We found it useful to use [**cookstyle**](https://github.com/chef/cookstyle) gem which is opinionated [**Rubocop**](https://github.com/bbatsov/rubocop) for Chef cookbook development. None of the nonsense of plain [**Rubocop**](https://github.com/bbatsov/rubocop). Just what you may need for cookbook development.
 
 ### System testing and TravisCI
 
