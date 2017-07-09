@@ -1,0 +1,12 @@
+dist: trusty
+
+group: edge
+
+branches:
+  only:
+    - master
+
+install:
+  - bundle install
+
+script: bundle exe mdl index.md
